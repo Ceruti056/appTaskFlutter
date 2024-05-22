@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home:const SplashScreen(),
       debugShowCheckedModeBanner: false,
+
        theme: MaterialTheme(Typography.blackCupertino).light(),
        darkTheme: MaterialTheme(Typography.blackCupertino).dark(),
     );
