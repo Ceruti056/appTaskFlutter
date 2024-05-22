@@ -73,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _deleteAndEditTasks(int index, Actions action) {
     final task = tasks[index];
     setState(() => tasks.removeAt(index));
-
     switch (action) {
       case Actions.delete:
         _showSnackbar(context, '${task.titulo} foi deletado', Colors.red);
@@ -88,9 +87,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTaskListTile(Task task) => ListTile(
         contentPadding: const EdgeInsets.all(16),
-        title: Text(task.titulo),
-        subtitle: Text(task.data),
-        leading: Text(task.hora),
+        subtitle: Text(task.dia_hora.toString()),
+        leading: Text(task.titulo),
       );
 
   AppBar _menuBar() {

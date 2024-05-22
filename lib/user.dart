@@ -1,5 +1,19 @@
+final String tableUser = 'notesUser';
+
+class NoteFieldUser {
+  static final List<String> values = [
+    //Add all fields
+    idUser, nome, email, senha
+  ];
+
+  static final String idUser = '_idUser';
+  static final String nome = 'nome';
+  static final String email = 'email';
+  static final String senha = 'senha';
+}
+
 class User {
-  final String idUser;
+  final int? idUser;
   final String nome;
   final String email;
   final String senha;
@@ -10,20 +24,28 @@ class User {
       required this.email,
       required this.senha});
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      idUser: json['idUser'] ?? 'default_id',
-      nome: json['nome'] ?? 'N/A',
-      email: json['email'] ?? 'N/A',
-      senha: json['senha'] ?? '*****',
-    );
-  }
+  User copy({
+    final int? idUser,
+    final String? nome,
+    final String? email,
+    final String? senha,
+  }) =>
+      User(
+          idUser: idUser ?? this.idUser,
+          nome: nome ?? this.nome,
+          email: email ?? this.email,
+          senha: senha ?? this.senha);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'nome': nome,
-      'email': email,
-      'senha': senha,
-    };
-  }
+  static User fromJson(Map<String, Object?> json) => User(
+      idUser: json[NoteFieldUser.idUser] as int?,
+      nome: json[NoteFieldUser.nome] as String,
+      email: json[NoteFieldUser.email] as String,
+      senha: json[NoteFieldUser.senha] as String);
+
+  Map<String, Object?> toJson() => {
+        NoteFieldUser.idUser: idUser,
+        NoteFieldUser.nome: nome,
+        NoteFieldUser.email: email,
+        NoteFieldUser.senha: senha
+      };
 }
