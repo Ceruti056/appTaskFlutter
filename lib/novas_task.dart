@@ -1,15 +1,140 @@
+import 'package:apptask/db.dart';
+import 'package:apptask/home_screen.dart';
+import 'package:apptask/task.dart';
+import 'package:apptask/task_concluida.dart';
 import 'package:flutter/material.dart';
 
 class NovaTaskPage extends StatefulWidget {
-  const NovaTaskPage({super.key});
+  const NovaTaskPage({Key? key, this.task}) : super(key: key);
+
+  final Task? task;
 
   @override
   State<NovaTaskPage> createState() => _NovaTaskPageState();
 }
 
 class _NovaTaskPageState extends State<NovaTaskPage> {
+  late final Task? task;
+  late Future<List<Task>> futureTasks;
+  final DB db = DB();
+
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final dia_horaController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: _menuBar(),
+      body: Center(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextFormField(
+                  controller: titleController,
+                  decoration: InputDecoration(labelText: 'First Name')),
+              const SizedBox(height: 30),
+              TextFormField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(labelText: 'Last Name')),
+              const SizedBox(height: 30),
+              TextFormField(
+                  controller: dia_horaController, // Added email input field
+                  decoration: InputDecoration(labelText: 'Email')),
+              const SizedBox(height: 30),
+              const Padding(padding: EdgeInsets.all(10)),
+              ElevatedButton(
+                onPressed: _addTask,
+                child: const Text('Add User'),
+              ),
+            ]),
+      ),
+    );
+  }
+
+  AppBar _menuBar() {
+    return AppBar(
+      title: Text('Nova Task'),
+      centerTitle: true,
+      actions: [
+        PopupMenuButton(itemBuilder: (BuildContext context) {
+          return [
+            PopupMenuItem(
+                child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const NovaTaskPage();
+                      }));
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Novas tasks'))),
+            PopupMenuItem(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const TaskConcluidaPage();
+                  }));
+                },
+                icon: const Icon(Icons.check),
+                label: const Text('Tasks Concluídas'),
+              ),
+            ),
+            PopupMenuItem(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const HomeScreen();
+                  }));
+                },
+                icon: const Icon(Icons.list),
+                label: const Text('Minhas Tasks'),
+              ),
+            ),
+          ];
+        }),
+      ],
+    );
+  }
+
+  void _addTask() {
+    if (titleController.text.isNotEmpty &&
+        descriptionController.text.isNotEmpty &&
+        dia_horaController.text.isNotEmpty) {
+      db
+          .addTask(Task(
+        idTask: task!.idTask, 
+        title: titleController
+            .text, // 
+        description: descriptionController.text,
+        dia_hora: dia_horaController.text.toString(), 
+      ))
+          .then((newTask) {
+        _showSnackbar('Task criada com sucesso!', Colors.green);
+        _refreshUserList();
+        _clear();
+      }).catchError((error) {
+        _showSnackbar('Falha em adicionar uma nova task: $error', Colors.red);
+      });
+    } else {
+      _showSnackbar('Preencha todos os campos obrigatórios', Colors.red);
+    }
+  }
+
+  void _showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _refreshUserList() {
+    setState(() {
+      futureTasks = db.getAllTask();
+    });
+  }
+
+   void _clear() {
+    titleController.text = "";
+    descriptionController.text = "";
+    dia_horaController.text = "";
   }
 }

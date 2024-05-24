@@ -1,3 +1,5 @@
+import 'package:apptask/db.dart';
+import 'package:apptask/edit_task.dart';
 import 'package:apptask/novas_task.dart';
 import 'package:apptask/task.dart';
 import 'package:apptask/task_concluida.dart';
@@ -7,14 +9,22 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 enum Actions { delete, edit }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key, this.task}) : super(key: key);
+
+  final Task? task;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Task> tasks = allTasks;
+  late Future<List<Task>> futureTasks;
+  late final Task task;
+  final DB db = DB();
+
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final dia_horaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,44 +32,40 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: _menuBar(),
       body: Stack(
         alignment: Alignment.topCenter,
-        children: [
+        children: <Widget>[
           SlidableAutoCloseBehavior(
             closeWhenOpened: true,
             child: ListView.builder(
-                itemCount: tasks.length,
+                itemCount: 2,
                 itemBuilder: (context, index) {
-                  final task = tasks[index];
-
                   return Slidable(
-                    key: Key(task.titulo),
+                    key: Key(task.title),
                     startActionPane: ActionPane(
                       motion: const StretchMotion(),
                       dismissible: DismissiblePane(
-                          onDismissed: () =>
-                              _deleteAndEditTasks(index, Actions.edit)),
+                          onDismissed: () => _showSnackbar(context,
+                              '${task.title} foi deletado', Colors.red)),
                       children: [
                         SlidableAction(
                           backgroundColor: Colors.lightBlueAccent,
                           icon: Icons.edit_outlined,
                           label: 'Edit',
-                          onPressed: (context) =>
-                              _deleteAndEditTasks(index, Actions.edit),
+                          onPressed: (context) => _deleteAndEditTasks(task),
                         ),
                       ],
                     ),
                     endActionPane: ActionPane(
                         motion: const BehindMotion(),
                         dismissible: DismissiblePane(
-                            onDismissed: () =>
-                                _deleteAndEditTasks(index, Actions.delete)),
+                          onDismissed: () => _deleteAndEditTasks(task),
+                        ),
                         children: [
                           SlidableAction(
                             backgroundColor: Colors.red,
                             icon: Icons.delete,
                             label: 'Delete',
-                            onPressed: (context) =>
-                                _deleteAndEditTasks(index, Actions.delete),
-                          )
+                            onPressed: (context) => _deleteAndEditTasks(task),
+                          ),
                         ]),
                     child: _buildTaskListTile(task),
                   );
@@ -70,30 +76,34 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _deleteAndEditTasks(int index, Actions action) {
-    final task = tasks[index];
-    setState(() => tasks.removeAt(index));
-    switch (action) {
-      case Actions.delete:
-        _showSnackbar(context, '${task.titulo} foi deletado', Colors.red);
-        break;
-      case Actions.edit:
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const NovaTaskPage();
-        }));
-        break;
-    }
+  Future<Widget> _deleteAndEditTasks(Task tasks) async {
+    return Wrap(
+      spacing: 12,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return const EditTaskPage();
+            }));
+          },
+        ),
+        // IconButton(
+        //   icon: Icon(Icons.delete),
+        //   onPressed: () =>
+        // ),
+      ],
+    );
   }
 
   Widget _buildTaskListTile(Task task) => ListTile(
         contentPadding: const EdgeInsets.all(16),
         subtitle: Text(task.dia_hora.toString()),
-        leading: Text(task.titulo),
+        leading: Text(task.title),
       );
 
   AppBar _menuBar() {
     return AppBar(
-      title: const Text('Minhas Tasks'),
       centerTitle: true,
       actions: [
         PopupMenuButton(itemBuilder: (BuildContext context) {
@@ -119,6 +129,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: const Text('Tasks Concluídas'),
               ),
             ),
+            PopupMenuItem(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const HomeScreen();
+                  }));
+                },
+                icon: const Icon(Icons.list),
+                label: const Text('Minhas Tasks'),
+              ),
+            ),
           ];
         }),
       ],
@@ -129,44 +150,4 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
-
-  // Widget _buildCard() {
-  //   return Container(
-  //     height: 150,
-  //     width: MediaQuery.of(context).size.width,
-  //     padding: const EdgeInsets.all(10.0),
-  //     child: Card(
-  //       color: cardCor,
-  //       child: InkWell(
-  //         onTap: () {
-  //           Navigator.push(context, MaterialPageRoute(builder: (context) {
-  //             return HomeScreen();
-  //           }));
-  //         },
-  //         child: Padding(
-  //           padding: const EdgeInsets.fromLTRB(30, 20, 30, 20),
-  //           child: Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               Container(
-  //                 alignment: Alignment.centerLeft,
-  //                 child: const Column(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: [
-  //                     Text("Nome"),
-  //                     Text("Data"),
-  //                   ],
-  //                 ),
-  //               ),
-  //               Container(
-  //                 alignment: Alignment.bottomRight,
-  //                 child: const Text("hora", textDirection: TextDirection.rtl),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
