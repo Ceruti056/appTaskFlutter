@@ -2,21 +2,39 @@ import 'package:apptask/db.dart';
 import 'package:apptask/home_screen.dart';
 import 'package:apptask/task.dart';
 import 'package:apptask/task_concluida.dart';
+import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
 
 class NovaTaskPage extends StatefulWidget {
-  const NovaTaskPage({Key? key, this.task}) : super(key: key);
+  const NovaTaskPage({
+    Key? key,
+    required this.user,
+  }) : super(key: key);
 
-  final Task? task;
+ final User user;
 
   @override
   State<NovaTaskPage> createState() => _NovaTaskPageState();
 }
 
 class _NovaTaskPageState extends State<NovaTaskPage> {
-  late final Task? task;
+  late final Task task;
+
+@override
+void initState() {
+    super.initState();
+    _refreshUserList();
+  }
+
+  void _refreshUserList() {
+    setState(() {
+      futureTasks = db.getAllTask();
+    });
+  }
+
   late Future<List<Task>> futureTasks;
-  final DB db = DB();
+  DB db = DB();
+
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -76,7 +94,7 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
 
   AppBar _menuBar() {
     return AppBar(
-      title: Text('Nova Task'),
+      title: const Text('Nova Task'),
       centerTitle: true,
       actions: [
         PopupMenuButton(itemBuilder: (BuildContext context) {
@@ -84,10 +102,12 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
             PopupMenuItem(
                 child: TextButton.icon(
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const NovaTaskPage();
-                      }));
+//TODO: Use snackBar para informar a pessoa que já está na página de nova task
+
+                      // Navigator.push(context,
+                      //     MaterialPageRoute(builder: (context) {
+                      //   return NovaTaskPage();
+                      // }));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Novas tasks'))),
@@ -106,7 +126,7 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
               child: TextButton.icon(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const HomeScreen();
+                    return HomeScreen(user: widget.user);
                   }));
                 },
                 icon: const Icon(Icons.list),
@@ -125,10 +145,9 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
         dia_horaController.text.isNotEmpty) {
       db
           .addTask(Task(
-              idTask: task!.idTask,
               title: titleController.text, //
               description: descriptionController.text,
-              dia_hora: DateTime.parse(dia_horaController.text)))
+              dia_hora: dia_horaController.text))
           .then((newTask) {
         _showSnackbar('Task criada com sucesso!', Colors.green);
         _refreshUserList();
@@ -144,12 +163,6 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
   void _showSnackbar(String message, Color color) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _refreshUserList() {
-    setState(() {
-      futureTasks = db.getAllTask();
-    });
   }
 
   void _clear() {

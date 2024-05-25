@@ -1,11 +1,11 @@
 class Task {
-  final int idTask;
+  final int? idTask;
   final String title;
   final String description;
-  final DateTime dia_hora;
+  final String dia_hora;
 
   Task({
-    required this.idTask,
+    this.idTask,
     required this.title,
     required this.description,
     required this.dia_hora,
@@ -22,6 +22,6 @@ class Task {
       'idTask' : idTask,
       'title' : title,
       'description' : description,
-      'dia_hora' : dia_hora.toIso8601String()
+      'dia_hora' : dia_hora
     };
 }
