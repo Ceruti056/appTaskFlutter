@@ -26,8 +26,8 @@ class DB {
         await db.execute('''
           CREATE TABLE tableTask (
             idTask $idType,
-            titulo $textType,
-            descricao $textType,
+            title $textType,
+            description $textType,
             dia_hora $textType
           )
         ''');

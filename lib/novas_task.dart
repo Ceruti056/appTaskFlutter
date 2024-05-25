@@ -18,9 +18,23 @@ class NovaTaskPage extends StatefulWidget {
 }
 
 class _NovaTaskPageState extends State<NovaTaskPage> {
-  late final Task? task;
+  late final Task task;
+
+@override
+void initState() {
+    super.initState();
+    _refreshUserList();
+  }
+
+  void _refreshUserList() {
+    setState(() {
+      futureTasks = db.getAllTask();
+    });
+  }
+
   late Future<List<Task>> futureTasks;
-  final DB db = DB();
+  DB db = DB();
+
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -131,10 +145,9 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
         dia_horaController.text.isNotEmpty) {
       db
           .addTask(Task(
-              idTask: task!.idTask,
               title: titleController.text, //
               description: descriptionController.text,
-              dia_hora: DateTime.parse(dia_horaController.text)))
+              dia_hora: dia_horaController.text))
           .then((newTask) {
         _showSnackbar('Task criada com sucesso!', Colors.green);
         _refreshUserList();
@@ -150,12 +163,6 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
   void _showSnackbar(String message, Color color) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _refreshUserList() {
-    setState(() {
-      futureTasks = db.getAllTask();
-    });
   }
 
   void _clear() {
