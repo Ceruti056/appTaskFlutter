@@ -18,9 +18,9 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
   late Future<List<Task>> futureTasks;
   final DB db = DB();
 
-  final titleController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final dia_horaController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController dia_horaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,22 +30,44 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(labelText: 'First Name')),
-              const SizedBox(height: 30),
-              TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(labelText: 'Last Name')),
-              const SizedBox(height: 30),
-              TextFormField(
-                  controller: dia_horaController, // Added email input field
-                  decoration: InputDecoration(labelText: 'Email')),
-              const SizedBox(height: 30),
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    TextFormField(
+                        controller: titleController,
+                        decoration: const InputDecoration(
+                            labelText: 'Título',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))))),
+                    const SizedBox(height: 30),
+                    TextFormField(
+                        controller: descriptionController,
+                        decoration: const InputDecoration(
+                            labelText: 'Descrição',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))))),
+                    const SizedBox(height: 30),
+                    TextFormField(
+                        controller: dia_horaController,
+                        decoration: const InputDecoration(
+                            labelText: 'Data/Hora',
+                            border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))))),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
               const Padding(padding: EdgeInsets.all(10)),
               ElevatedButton(
-                onPressed: _addTask,
-                child: const Text('Add User'),
+                onPressed: () {
+                  _addTask();
+                  Navigator.pop(context);
+                },
+                child: const Text('Adicionar'),
               ),
             ]),
       ),
@@ -103,12 +125,10 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
         dia_horaController.text.isNotEmpty) {
       db
           .addTask(Task(
-        idTask: task!.idTask, 
-        title: titleController
-            .text, // 
-        description: descriptionController.text,
-        dia_hora: dia_horaController.text.toString(), 
-      ))
+              idTask: task!.idTask,
+              title: titleController.text, //
+              description: descriptionController.text,
+              dia_hora: DateTime.parse(dia_horaController.text)))
           .then((newTask) {
         _showSnackbar('Task criada com sucesso!', Colors.green);
         _refreshUserList();
@@ -132,7 +152,7 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
     });
   }
 
-   void _clear() {
+  void _clear() {
     titleController.text = "";
     descriptionController.text = "";
     dia_horaController.text = "";

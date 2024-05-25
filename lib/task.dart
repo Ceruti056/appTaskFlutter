@@ -22,6 +22,6 @@ class Task {
       'idTask' : idTask,
       'title' : title,
       'description' : description,
-      'dia_hora' : dia_hora
+      'dia_hora' : dia_hora.toIso8601String()
     };
 }

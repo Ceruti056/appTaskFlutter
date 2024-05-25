@@ -42,7 +42,7 @@ class DB {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<int> updateTask(Task task) async {
+  Future<int> updateTask(Task task, Map<String, dynamic> dataToUpdate) async {
     final db = await _initDatabase();
 
     return await db.update('Task', task.toJson(),
@@ -96,14 +96,11 @@ class DB {
     );
   }
 
-  Future<List<User>?> getAllUser() async {
+  Future<List<User>> getAllUser() async {
     final db = await _initDatabase();
 
     final List<Map<String, dynamic>> mapsUser = await db.query('User');
 
-    if (mapsUser.isEmpty) {
-      return null;
-    }
 
     return List.generate(
         mapsUser.length, (index) => User.fromJson(mapsUser[index]));
