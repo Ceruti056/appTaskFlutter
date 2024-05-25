@@ -2,13 +2,14 @@ import 'package:apptask/db.dart';
 import 'package:apptask/novas_task.dart';
 import 'package:apptask/task.dart';
 import 'package:apptask/task_concluida.dart';
+import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, this.task}) : super(key: key);
+  const HomeScreen({super.key, required this.user});
 
-  final Task? task;
+  final User user;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,9 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _refreshUserList();
   }
 
-  late Future<List<Task>> futureTasks;
-  late final Task task;
-  final DB db = DB();
+ late Future<List<Task>> futureTasks;
+DB db = DB();
+
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
             closeWhenOpened: true,
             child: ListView.builder(itemBuilder: (context, index) {
               return Slidable(
-                key: Key(task.title),
+                key: Key(widget.task.title),
                 startActionPane: ActionPane(
                   motion: const StretchMotion(),
                   dismissible:
@@ -127,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: TextButton.icon(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const HomeScreen();
+                    return const HomeScreen(task: ,);
                   }));
                 },
                 icon: const Icon(Icons.list),
@@ -206,11 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _showSnackbar('Falha ao deletar a Task', Colors.red);
     });
 
-    showDialog(
-      context: context, 
-      builder: (context) => AlertDialog(
-        
-      ));
+    showDialog(context: context, builder: (context) => AlertDialog());
   }
 
   void _updateTask(Task task) {
