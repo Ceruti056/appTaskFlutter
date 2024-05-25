@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       //  theme: MaterialTheme(Typography.blackCupertino).light(),
-      darkTheme: MaterialTheme(Typography.blackCupertino).dark(),
+      darkTheme: const MaterialTheme(Typography.blackCupertino).dark(),
     );
   }
 }

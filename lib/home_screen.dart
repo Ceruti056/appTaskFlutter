@@ -8,7 +8,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.user});
-
   final User user;
 
   @override
@@ -19,60 +18,165 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
     _refreshUserList();
   }
 
- late Future<List<Task>> futureTasks;
-DB db = DB();
+  void _refreshUserList() {
+    setState(() {
+      futureTasks = db.getAllTask();
+    });
+  }
 
+  late Future<List<Task>> futureTasks;
+  DB db = DB();
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController dia_horaController = TextEditingController();
+  final TextEditingController diahoraController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     _refreshUserList();
     return Scaffold(
-      appBar: _menuBar(),
-      body: Stack(
-        alignment: Alignment.topCenter,
-        children: <Widget>[
-          SlidableAutoCloseBehavior(
-            closeWhenOpened: true,
-            child: ListView.builder(itemBuilder: (context, index) {
-              return Slidable(
-                key: Key(widget.task.title),
-                startActionPane: ActionPane(
-                  motion: const StretchMotion(),
+        appBar: _menuBar(),
+        body: FutureBuilder(
+            future: futureTasks,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    Task task = snapshot.data![index];
+                    return CardTask(
+                      task: task,
+                      user: widget.user,
+                    );
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+              return const CircularProgressIndicator();
+            }));
+  }
+
+  AppBar _menuBar() {
+    return AppBar(
+      title: const Text('Minhas Tasks'),
+      centerTitle: true,
+      actions: [
+        PopupMenuButton(itemBuilder: (BuildContext context) {
+          return [
+            PopupMenuItem(
+                child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return NovaTaskPage(
+                          user: widget.user,
+                        );
+                      }));
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Novas tasks'))),
+            PopupMenuItem(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const TaskConcluidaPage();
+                  }));
+                },
+                icon: const Icon(Icons.check),
+                label: const Text('Tasks Concluídas'),
+              ),
+            ),
+            PopupMenuItem(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return HomeScreen(
+                      user: widget.user,
+                    );
+                  }));
+                },
+                icon: const Icon(Icons.list),
+                label: const Text('Minhas Tasks'),
+              ),
+            ),
+          ];
+        }),
+      ],
+    );
+  }
+}
+
+class CardTask extends StatefulWidget {
+  const CardTask({super.key, required this.task, required this.user});
+  final Task task;
+  final User user;
+
+  @override
+  State<CardTask> createState() => _CardTaskState();
+}
+
+class _CardTaskState extends State<CardTask> {
+  @override
+  void initState() {
+    super.initState();
+    _refreshUserList();
+  }
+
+  void _refreshUserList() {
+    setState(() {
+      futureTasks = db.getAllTask();
+    });
+  }
+
+  late Future<List<Task>> futureTasks;
+  DB db = DB();
+
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController diahoraController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: <Widget>[
+        SlidableAutoCloseBehavior(
+          closeWhenOpened: true,
+          child: ListView.builder(itemBuilder: (context, index) {
+            return Slidable(
+              key: Key(widget.task.title),
+              startActionPane: ActionPane(
+                motion: const StretchMotion(),
+                dismissible:
+                    DismissiblePane(onDismissed: () => _deleteAndEditTasks),
+                children: [
+                  SlidableAction(
+                      backgroundColor: Colors.lightBlueAccent,
+                      icon: Icons.edit_outlined,
+                      label: 'Edit',
+                      onPressed: (context) => _deleteAndEditTasks),
+                ],
+              ),
+              endActionPane: ActionPane(
+                  motion: const BehindMotion(),
                   dismissible:
                       DismissiblePane(onDismissed: () => _deleteAndEditTasks),
                   children: [
                     SlidableAction(
-                        backgroundColor: Colors.lightBlueAccent,
-                        icon: Icons.edit_outlined,
-                        label: 'Edit',
+                        backgroundColor: Colors.red,
+                        icon: Icons.delete,
+                        label: 'Delete',
                         onPressed: (context) => _deleteAndEditTasks),
-                  ],
-                ),
-                endActionPane: ActionPane(
-                    motion: const BehindMotion(),
-                    dismissible:
-                        DismissiblePane(onDismissed: () => _deleteAndEditTasks),
-                    children: [
-                      SlidableAction(
-                          backgroundColor: Colors.red,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                          onPressed: (context) => _deleteAndEditTasks),
-                    ]),
-                child: _buildTaskListTile(task),
-              );
-            }),
-          ),
-        ],
-      ),
+                  ]),
+              child: _buildTaskListTile(widget.task),
+            );
+          }),
+        ),
+      ],
     );
   }
 
@@ -96,55 +200,10 @@ DB db = DB();
         leading: Text(task.title),
       );
 
-  AppBar _menuBar() {
-    return AppBar(
-      title: Text('Minhas Tasks'),
-      centerTitle: true,
-      actions: [
-        PopupMenuButton(itemBuilder: (BuildContext context) {
-          return [
-            PopupMenuItem(
-                child: TextButton.icon(
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const NovaTaskPage();
-                      }));
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Novas tasks'))),
-            PopupMenuItem(
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const TaskConcluidaPage();
-                  }));
-                },
-                icon: const Icon(Icons.check),
-                label: const Text('Tasks Concluídas'),
-              ),
-            ),
-            PopupMenuItem(
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const HomeScreen(task: ,);
-                  }));
-                },
-                icon: const Icon(Icons.list),
-                label: const Text('Minhas Tasks'),
-              ),
-            ),
-          ];
-        }),
-      ],
-    );
-  }
-
   void _showEditDialog(Task task) {
     titleController.text = task.title;
     descriptionController.text = task.description;
-    dia_horaController.text = task.dia_hora.toIso8601String();
+    diahoraController.text = task.dia_hora.toIso8601String();
 
     showDialog(
       context: context,
@@ -169,7 +228,7 @@ DB db = DB();
                           borderRadius: BorderRadius.all(Radius.circular(5))))),
               const SizedBox(height: 30),
               TextFormField(
-                  controller: dia_horaController,
+                  controller: diahoraController,
                   decoration: const InputDecoration(
                       labelText: 'Data/Hora',
                       border: OutlineInputBorder(
@@ -195,19 +254,19 @@ DB db = DB();
   void _deleteTask(String id) {
     db
         .deleteTask(Task(
-            idTask: task.idTask,
+            idTask: widget.task.idTask,
             title: titleController.text,
             description: descriptionController.text,
-            dia_hora: DateTime.parse(dia_horaController.text)))
+            dia_hora: DateTime.parse(diahoraController.text)))
         .then((_) {
       _showSnackbar(
-          'A Task ${task.title} deletada com seucesso!', Colors.green);
+          'A Task ${widget.task.title} deletada com seucesso!', Colors.green);
       _refreshUserList();
     }).catchError((error) {
       _showSnackbar('Falha ao deletar a Task', Colors.red);
     });
 
-    showDialog(context: context, builder: (context) => AlertDialog());
+    showDialog(context: context, builder: (context) => const AlertDialog());
   }
 
   void _updateTask(Task task) {
@@ -215,20 +274,20 @@ DB db = DB();
     Map<String, dynamic> dataToUpdate = {
       'Título': titleController.text,
       'Descrição': descriptionController.text,
-      'Data/Hora': dia_horaController.text,
+      'Data/Hora': diahoraController.text,
       // Não inclua 'email' pois é proibido atualizar
     };
 
     if (titleController.text.isNotEmpty &&
         descriptionController.text.isNotEmpty &&
-        dia_horaController.text.isNotEmpty) {
+        diahoraController.text.isNotEmpty) {
       db
           .updateTask(
               Task(
                   idTask: task.idTask,
                   title: titleController.text,
                   description: descriptionController.text,
-                  dia_hora: DateTime.parse(dia_horaController.text)),
+                  dia_hora: DateTime.parse(diahoraController.text)),
               dataToUpdate)
           .then((updatedTask) {
         _showSnackbar('Task atualizada com sucesso!', Colors.green);
@@ -245,15 +304,9 @@ DB db = DB();
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void _refreshUserList() {
-    setState(() {
-      futureTasks = db.getAllTask();
-    });
-  }
-
   void _clear() {
     titleController.text = "";
     descriptionController.text = "";
-    dia_horaController.text = "";
+    diahoraController.text = "";
   }
 }

@@ -1,6 +1,5 @@
 import 'package:apptask/db.dart';
 import 'package:apptask/home_screen.dart';
-import 'package:apptask/novas_task.dart';
 import 'package:apptask/task_concluida.dart';
 import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +82,7 @@ late final User? user;
 
  AppBar _menuBar() {
     return AppBar(
-      title: Text('Editar'),
+      title: const Text('Editar'),
       centerTitle: true,
       actions: [
         PopupMenuButton(itemBuilder: (BuildContext context) {
@@ -91,10 +90,12 @@ late final User? user;
             PopupMenuItem(
                 child: TextButton.icon(
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return const NovaTaskPage();
-                      }));
+                      //TODO: Implementar a navegação para a tela de HOMESCREEN
+
+                      // Navigator.push(context,
+                      //     MaterialPageRoute(builder: (context) {
+                      //   return const NovaTaskPage();
+                      // }));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Novas tasks'))),
@@ -113,7 +114,7 @@ late final User? user;
               child: TextButton.icon(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const HomeScreen();
+                    return HomeScreen(user: User(idUser: 1, email:"sdws", nome: "swdws", senha: "sdsd" ),);
                   }));
                 },
                 icon: const Icon(Icons.list),

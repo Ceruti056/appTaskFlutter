@@ -5,9 +5,7 @@ import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key, this.user}) : super(key: key);
-
-  final User? user;
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -15,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late Future<List<User>> futureUsers;
-  late final User user;
+  late User user;
   final DB db = DB();
 
   final TextEditingController emailController = TextEditingController();
@@ -59,7 +57,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const HomeScreen()));
+                      MaterialPageRoute(builder: (_) => HomeScreen(
+                          user: User(
+                              idUser: 1,
+                              email: "sdws",
+                              nome: "swdws",
+                              senha: "sdsd"))));
                 },
                 child: const Text('Logar')),
             TextButton(
@@ -71,7 +74,11 @@ class _LoginScreenState extends State<LoginScreen> {
             TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const HomeScreen()));
+                      MaterialPageRoute(builder: (_) => HomeScreen(user: User(
+                          idUser: 1,
+                          email: "sdws",
+                          nome: "swdws",
+                          senha: "sdsd"))));
                 },
                 child: const Text('Esqueceu sua senha? Clique aqui')),
           ],
