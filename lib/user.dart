@@ -1,26 +1,21 @@
 class User {
-  final int idUser;
-  final String nome;
-  final String email;
-  final String senha;
+  int idUser = 0;
+  String nome = "";
+  String email = "";
+  String senha = "";
 
-  User(
-      {required this.idUser,
-      required this.nome,
-      required this.email,
-      required this.senha});
+  User({required this.idUser, required this.nome, required this.email, required this.senha});
 
-      factory User.fromJson(Map<String, dynamic> json) => User(
-    idUser: json['idUser'], 
-    nome: json['nome'], 
-    email: json['email'], 
-    senha: json['senha']
-    );
+  Map<String, dynamic> toMap() {
+    
+    var map = <String, dynamic>{'nome': nome, 'email': email, 'senha': senha};
 
-    Map<String, dynamic> toJson() => {
-      'idUser' : idUser,
-      'nome' : nome,
-      'email' : email,
-      'senha' : senha
-    };
+    return map;
+  }
+
+  User.fromMap(Map<dynamic,dynamic> map){
+    nome = map['nome'];
+    email = map['email'];
+    senha = map['senha'];
+  }
 }

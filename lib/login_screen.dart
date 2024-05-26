@@ -1,5 +1,5 @@
 import 'package:apptask/cadastro_screen.dart';
-import 'package:apptask/db.dart';
+import 'package:apptask/dbTask.dart';
 import 'package:apptask/home_screen.dart';
 import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
             TextButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const CadastroScreen()));
+                      builder: (_) =>  CadastroScreen(user: User(idUser: 1, nome: 'dcs', email: 'csvsvs', senha: 'idfvsjfv'),)));
                 },
                 child: const Text('Não possui conta? Cadastre-se')),
             TextButton(

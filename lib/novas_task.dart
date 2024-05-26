@@ -1,4 +1,4 @@
-import 'package:apptask/db.dart';
+import 'package:apptask/dbTask.dart';
 import 'package:apptask/home_screen.dart';
 import 'package:apptask/task.dart';
 import 'package:apptask/task_concluida.dart';
@@ -23,10 +23,10 @@ class _NovaTaskPageState extends State<NovaTaskPage> {
 @override
 void initState() {
     super.initState();
-    _refreshUserList();
+    _refreshList();
   }
 
-  void _refreshUserList() {
+  void _refreshList() {
     setState(() {
       futureTasks = db.getAllTask();
     });
@@ -83,6 +83,7 @@ void initState() {
               ElevatedButton(
                 onPressed: () {
                   _addTask();
+                  _refreshList();
                   Navigator.pop(context);
                 },
                 child: const Text('Adicionar'),
@@ -102,12 +103,7 @@ void initState() {
             PopupMenuItem(
                 child: TextButton.icon(
                     onPressed: () {
-//TODO: Use snackBar para informar a pessoa que já está na página de nova task
-
-                      // Navigator.push(context,
-                      //     MaterialPageRoute(builder: (context) {
-                      //   return NovaTaskPage();
-                      // }));
+                      _showSnackbar('Você já está na página Nova Task.', Colors.blue);
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Novas tasks'))),
@@ -117,6 +113,7 @@ void initState() {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return const TaskConcluidaPage();
                   }));
+                  dispose();
                 },
                 icon: const Icon(Icons.check),
                 label: const Text('Tasks Concluídas'),
@@ -128,6 +125,7 @@ void initState() {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return HomeScreen(user: widget.user);
                   }));
+                  dispose();
                 },
                 icon: const Icon(Icons.list),
                 label: const Text('Minhas Tasks'),
@@ -150,10 +148,10 @@ void initState() {
               dia_hora: dia_horaController.text))
           .then((newTask) {
         _showSnackbar('Task criada com sucesso!', Colors.green);
-        _refreshUserList();
-        _clear();
       }).catchError((error) {
         _showSnackbar('Falha em adicionar uma nova task: $error', Colors.red);
+        _refreshList();
+        //_clear();
       });
     } else {
       _showSnackbar('Preencha todos os campos obrigatórios', Colors.red);

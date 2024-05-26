@@ -1,88 +1,101 @@
-import 'package:apptask/db.dart';
+import 'package:apptask/dbTask.dart';
+import 'package:apptask/dbUser.dart';
 import 'package:apptask/home_screen.dart';
 import 'package:apptask/task_concluida.dart';
 import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
 
 class CadastroScreen extends StatefulWidget {
-const CadastroScreen({Key? key, this.user}) : super(key: key);
-
-  final User? user;
+  const CadastroScreen({super.key, required this.user});
+  final String title = "Cadastrar";
+  final User user;
 
   @override
   State<CadastroScreen> createState() => _CadastroScreenState();
 }
 
 class _CadastroScreenState extends State<CadastroScreen> {
-late final User? user;
-  late Future<List<User>> futureUsers;
-  final DB db = DB();
+  LoginDB login = LoginDB();
 
-  final TextEditingController nomeController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController();
+  TextEditingController nome = TextEditingController();
+  TextEditingController email = TextEditingController();
+  TextEditingController senha = TextEditingController();
+  TextEditingController resenha = TextEditingController();
+
+  final formkey = GlobalKey<FormState>();
+  bool mostraSenha = false;
+  String resultado = "";
 
   @override
   Widget build(BuildContext context) {
-    _refreshUserList();
-
-    nomeController.text = user!.nome;
-    emailController.text = user!.email;
-   senhaController.text = user!.senha;
-
     return Scaffold(
-      appBar: _menuBar(),
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(20),
+        appBar: _menuBar(),
+        body: SingleChildScrollView(
+          reverse: true,
+          child: Form(
+              key: formkey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
-                children: [
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
                   TextFormField(
-                      controller: nomeController,
-                      decoration: const InputDecoration(
-                          labelText: 'Nome',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))))),
+                    controller: email,
+                    decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.email_outlined),
+                        labelText: 'E-mail',
+                        hintText: 'Digite seu e-mail',
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5)))),
+                  ),
                   const SizedBox(height: 30),
                   TextFormField(
-                      controller: emailController,
-                      decoration: const InputDecoration(
-                          labelText: 'E-mail',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))))),
-                  const SizedBox(height: 30),
-                  TextFormField(
-                      controller: senhaController,
-                      decoration: const InputDecoration(
-                          labelText: 'Senha',
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))))),
-                  const SizedBox(height: 30),
+                    controller: senha,
+                    decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.key_outlined),
+                        labelText: 'Senha',
+                        hintText: 'Digite sua senha',
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5)))),
+                  ),
                 ],
-              ),
-            ),
-            const Padding(padding: EdgeInsets.all(10)),
-            ElevatedButton(
-              onPressed: () {
-                _addUser(user!);
-                Navigator.pop(context);
-              },
-              child: const Text('Editar'),
-            ),
-          ],
-        ),
-      ),
-    );
+              )),
+        ));
   }
 
- AppBar _menuBar() {
+  void _cadastro() {
+    if (nome.text.isNotEmpty &&
+        email.text.isNotEmpty &&
+        senha.text.isNotEmpty) {
+      setState(() {
+        _showSnackbar('Preencha todos os campos', Colors.yellow);
+      });
+    }
+
+    if (senha.text != resenha.text) {
+      setState(() {
+        _showSnackbar('Senha inválida. Digite novamente', Colors.red);
+        senha.text = "";
+      });
+    }
+
+    if (senha.text == resenha.text) {
+      setState(() {
+        _showSnackbar('Cadastro realizado com sucesso!', Colors.green);
+        login.addUser(User(
+            idUser: widget.user.idUser,
+            nome: nome.text,
+            email: email.text,
+            senha: senha.text));
+        Navigator.pop(context, '/login');
+      });
+    }
+  }
+
+  AppBar _menuBar() {
     return AppBar(
-      title: const Text('Editar'),
+      title: const Text('Cadastrar'),
       centerTitle: true,
       actions: [
         PopupMenuButton(itemBuilder: (BuildContext context) {
@@ -90,12 +103,17 @@ late final User? user;
             PopupMenuItem(
                 child: TextButton.icon(
                     onPressed: () {
-                      //TODO: Implementar a navegação para a tela de HOMESCREEN
-
-                      // Navigator.push(context,
-                      //     MaterialPageRoute(builder: (context) {
-                      //   return const NovaTaskPage();
-                      // }));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return HomeScreen(
+                          user: User(
+                              idUser: widget.user.idUser,
+                              nome: nome.text,
+                              email: email.text,
+                              senha: senha.text),
+                        );
+                      }));
+                      dispose();
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Novas tasks'))),
@@ -105,6 +123,7 @@ late final User? user;
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return const TaskConcluidaPage();
                   }));
+                  dispose();
                 },
                 icon: const Icon(Icons.check),
                 label: const Text('Tasks Concluídas'),
@@ -114,8 +133,15 @@ late final User? user;
               child: TextButton.icon(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return HomeScreen(user: User(idUser: 1, email:"sdws", nome: "swdws", senha: "sdsd" ),);
+                    return HomeScreen(
+                      user: User(
+                          idUser: widget.user.idUser,
+                          nome: nome.text,
+                          email: email.text,
+                          senha: senha.text),
+                    );
                   }));
+                  dispose();
                 },
                 icon: const Icon(Icons.list),
                 label: const Text('Minhas Tasks'),
@@ -127,42 +153,8 @@ late final User? user;
     );
   }
 
-  void _addUser(User user) {
-    if (nomeController.text.isNotEmpty &&
-        emailController.text.isNotEmpty &&
-        senhaController.text.isNotEmpty) {
-      db
-          .addUser(User(
-              idUser: user.idUser,
-              nome: nomeController.text, //
-              email: emailController.text,
-              senha: senhaController.text))
-          .then((newUser) {
-        _showSnackbar('Usuário criado com sucesso!', Colors.green);
-        _refreshUserList();
-        _clear();
-      }).catchError((error) {
-        _showSnackbar('Falha em adicionar uma nova task: $error', Colors.red);
-      });
-    } else {
-      _showSnackbar('Preencha todos os campos obrigatórios', Colors.red);
-    }
-  }
-
   void _showSnackbar(String message, Color color) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _refreshUserList() {
-    setState(() {
-      futureUsers = db.getAllUser();
-    });
-  }
-
-  void _clear() {
-    nomeController.text = "";
-    emailController.text = "";
-    senhaController.text = "";
   }
 }

@@ -1,4 +1,4 @@
-import 'package:apptask/db.dart';
+import 'package:apptask/dbTask.dart';
 import 'package:apptask/task.dart';
 import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +17,10 @@ class _CardTaskState extends State<CardTask> {
   @override
   void initState() {
     super.initState();
-    _refreshUserList();
+    _refreshList();
   }
 
-  void _refreshUserList() {
+  void _refreshList() {
     setState(() {
       futureTasks = db.getAllTask();
     });
@@ -35,84 +35,81 @@ class _CardTaskState extends State<CardTask> {
 
   @override
   Widget build(BuildContext context) {
+    _refreshList();
     return SizedBox(
       height: 130,
       child: Stack(
-        children:[
+        children: [
           SlidableAutoCloseBehavior(
             closeWhenOpened: true,
             child: FutureBuilder<List<Task>>(
-  future: futureTasks,
-  builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return CircularProgressIndicator();
-    } else if (snapshot.hasError) {
-      return Text('Erro: ${snapshot.error}');
-    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-      return Text('Nenhuma tarefa encontrada');
-    } else {
-      return ListView.builder(
-        itemCount: snapshot.data!.length,
-        itemBuilder: (context, index) {
-          final task = snapshot.data![index];
-          return Slidable(
-            key: Key(task.title),
-            startActionPane: ActionPane(
-              motion: const StretchMotion(),
-              dismissible: DismissiblePane(onDismissed: () => _deleteAndEditTasks(task)),
-              children: [
-                SlidableAction(
-                  backgroundColor: Colors.lightBlueAccent,
-                  icon: Icons.edit_outlined,
-                  label: 'Edit',
-                  onPressed: (context) => _deleteAndEditTasks(task),
-                ),
-              ],
+              future: futureTasks,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Erro: ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text('Nenhuma tarefa encontrada');
+                } else {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final task = snapshot.data![index];
+                      return Slidable(
+                        key: Key(task.title),
+                        startActionPane: ActionPane(
+                          motion: const StretchMotion(),
+                          dismissible: DismissiblePane(
+                              onDismissed: () => _showEditDialog(task)),
+                          children: [
+                            SlidableAction(
+                              backgroundColor: Colors.lightBlueAccent,
+                              icon: Icons.edit_outlined,
+                              label: 'Edit',
+                              onPressed: (context) => _showEditDialog(task),
+                            ),
+                          ],
+                        ),
+                        endActionPane: ActionPane(
+                          motion: const BehindMotion(),
+                          dismissible: DismissiblePane(
+                              onDismissed: () =>
+                                  _deleteTask(task.idTask.toString())),
+                          children: [
+                            SlidableAction(
+                              backgroundColor: Colors.red,
+                              icon: Icons.delete,
+                              label: 'Delete',
+                              onPressed: (context) =>
+                                  _deleteTask(task.idTask.toString()),
+                            ),
+                          ],
+                        ),
+                        child: _buildTaskListTile(task),
+                      );
+                    },
+                  );
+                }
+              },
             ),
-            endActionPane: ActionPane(
-              motion: const BehindMotion(),
-              dismissible: DismissiblePane(onDismissed: () => _deleteAndEditTasks(task)),
-              children: [
-                SlidableAction(
-                  backgroundColor: Colors.red,
-                  icon: Icons.delete,
-                  label: 'Delete',
-                  onPressed: (context) => _deleteAndEditTasks(task),
-                ),
-              ],
-            ),
-            child: _buildTaskListTile(task),
-          );
-        },
-      );
-    }
-  },
-),
-
           ),
         ],
       ),
     );
   }
 
-  Future<Widget> _deleteAndEditTasks(Task task) async {
-    return Wrap(
-      spacing: 12,
-      children: <Widget>[
-        IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () => _showEditDialog(task)),
-        IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _showEditDialog(task)),
-      ],
-    );
-  }
-
   Widget _buildTaskListTile(Task task) => ListTile(
         contentPadding: const EdgeInsets.all(16),
         subtitle: Text(task.dia_hora.toString()),
-        leading: Text(task.title),
+        title: Text(task.title),
+        onTap: () {
+          final slidable = Slidable.of(context)!;
+          final isClosed = slidable.actionPaneType.value == ActionPaneType.none;
+          if (isClosed) {
+            slidable.openStartActionPane();
+          }
+        },
       );
 
   void _showEditDialog(Task task) {
@@ -157,7 +154,7 @@ class _CardTaskState extends State<CardTask> {
             child: const Text("Salvar"),
             onPressed: () {
               _updateTask(task);
-              _clear();
+              //_clear();
               Navigator.of(context).pop();
             },
           ),
@@ -174,9 +171,9 @@ class _CardTaskState extends State<CardTask> {
             description: descriptionController.text,
             dia_hora: diahoraController.text))
         .then((_) {
-      _showSnackbar(
-          'A Task ${widget.task.title} deletada com seucesso!', Colors.green);
-      //_refreshUserList();
+      _showSnackbar('A Task ${widget.task.title} foi deletada com sucesso!',
+          Colors.green);
+      _refreshList();
     }).catchError((error) {
       _showSnackbar('Falha ao deletar a Task', Colors.red);
     });
@@ -206,8 +203,8 @@ class _CardTaskState extends State<CardTask> {
               dataToUpdate)
           .then((updatedTask) {
         _showSnackbar('Task atualizada com sucesso!', Colors.green);
-        //_refreshUserList();
-        _clear();
+        _refreshList();
+        //_clear();
       }).catchError((error) {
         _showSnackbar('Falha ao atualizar a Task: $error', Colors.red);
       });

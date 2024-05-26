@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:apptask/splash_screen.dart';
 import 'package:apptask/theme.dart';
 import 'package:flutter/foundation.dart';
@@ -27,8 +26,8 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
 
-      //  theme: MaterialTheme(Typography.blackCupertino).light(),
-      darkTheme: const MaterialTheme(Typography.blackCupertino).dark(),
+      theme: MaterialTheme(Typography.blackCupertino).light(),
+      //darkTheme: MaterialTheme(Typography.blackCupertino).dark(),
     );
   }
 }

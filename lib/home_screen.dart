@@ -1,5 +1,5 @@
 import 'package:apptask/card_task.dart';
-import 'package:apptask/db.dart';
+import 'package:apptask/dbTask.dart';
 import 'package:apptask/novas_task.dart';
 import 'package:apptask/task.dart';
 import 'package:apptask/task_concluida.dart';
@@ -72,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           user: widget.user,
                         );
                       }));
+                      dispose();
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Novas tasks'))),
@@ -81,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return const TaskConcluidaPage();
                   }));
+                  dispose();
                 },
                 icon: const Icon(Icons.check),
                 label: const Text('Tasks Concluídas'),
@@ -89,11 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             PopupMenuItem(
               child: TextButton.icon(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return HomeScreen(
-                      user: widget.user,
-                    );
-                  }));
+                   _showSnackbar('Você já está na página Minhas Tasks.', Colors.blue);
                 },
                 icon: const Icon(Icons.list),
                 label: const Text('Minhas Tasks'),
@@ -103,5 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
         }),
       ],
     );
+  }
+
+    void _showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }
