@@ -1,21 +1,55 @@
-class User {
-  int idUser = 0;
-  String nome = "";
-  String email = "";
-  String senha = "";
+class Users {
+  final int? idUser;
+  final String nome;
+  final String senha;
+  final String email;
 
-  User({required this.idUser, required this.nome, required this.email, required this.senha});
+  Users({
+    this.idUser,
+    required this.nome,
+    required this.senha,
+    required this.email
+  });
 
-  Map<String, dynamic> toMap() {
-    
-    var map = <String, dynamic>{'nome': nome, 'email': email, 'senha': senha};
+  factory Users.fromMap(Map<String, dynamic> json) => Users(
+        idUser: json["idUser"],
+        nome: json["nome"],
+        email: json["email"],
+        senha: json["senha"],
+      );
 
-    return map;
-  }
+  Map<String, dynamic> toMap() => {
+        "idUser": idUser,
+        "nome": nome,
+        "email" : email,
+        "senha": senha,
+      };
+}
 
-  User.fromMap(Map<dynamic,dynamic> map){
-    nome = map['nome'];
-    email = map['email'];
-    senha = map['senha'];
-  }
+class NoteModel {
+  final int? noteId;
+  final String noteTitle;
+  final String noteContent;
+  final String createdAt;
+
+  NoteModel({
+    this.noteId,
+    required this.noteTitle,
+    required this.noteContent,
+    required this.createdAt,
+  });
+
+  factory NoteModel.fromMap(Map<String, dynamic> json) => NoteModel(
+        noteId: json["noteId"],
+        noteTitle: json["noteTitle"],
+        noteContent: json["noteContent"],
+        createdAt: json["createdAt"],
+      );
+
+  Map<String, dynamic> toMap() => {
+        "noteId": noteId,
+        "noteTitle": noteTitle,
+        "noteContent": noteContent,
+        "createdAt": createdAt,
+      };
 }

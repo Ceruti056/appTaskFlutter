@@ -11,7 +11,7 @@ class NovaTaskPage extends StatefulWidget {
     required this.user,
   }) : super(key: key);
 
- final User user;
+ final Users user;
 
   @override
   State<NovaTaskPage> createState() => _NovaTaskPageState();
@@ -143,9 +143,10 @@ void initState() {
         dia_horaController.text.isNotEmpty) {
       db
           .addTask(Task(
+            idTask: task.idTask,
               title: titleController.text, //
               description: descriptionController.text,
-              dia_hora: dia_horaController.text))
+              dia_hora: DateTime.now().toIso8601String()))
           .then((newTask) {
         _showSnackbar('Task criada com sucesso!', Colors.green);
       }).catchError((error) {

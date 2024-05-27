@@ -1,99 +1,82 @@
-import 'package:apptask/user.dart';
-import 'package:path/path.dart';
+import 'package:apptask/user.dart';import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class LoginDB {
-  _recuperarDataBase() async {
-    final caminhoDB = await getDatabasesPath();
-    final localDB = caminhoDB + 'local.db';
+class DatabaseHelper {
+  final databaseName = "notes.db";
+  String noteTable =
+      "CREATE TABLE notes (noteId INTEGER PRIMARY KEY AUTOINCREMENT, noteTitle TEXT NOT NULL, noteContent TEXT NOT NULL, createdAt TEXT DEFAULT CURRENT_TIMESTAMP)";
 
-    return await openDatabase(
-      join(
-        await getDatabasesPath(),
-        'users.db',
-        localDB,
-      ),
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE tb_user (
-            'idUser INTEGER PRIMARY KEY AUTOINCREMENT',
-             'nome TEXT NOT NULL',
-            'email TEXT NOT NULL',
-           'senha TEXT NOT NULL'
-          )
-        ''');
-      },
-    );
+
+  String users =
+      "create table users (idUser INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, email TEXT UNIQUE, senha TEXT)";
+
+
+
+  Future<Database> initDB() async {
+    final databasePath = await getDatabasesPath();
+    final path = join(databasePath, databaseName);
+
+    return openDatabase(path, version: 1, onCreate: (db, version) async {
+      await db.execute(users);
+      await db.execute(noteTable);
+    });
   }
 
-  addUser(User user) async {
-    Database db = await _recuperarDataBase();
 
-    return await db.insert('tb_user', user.toMap());
-  }
+  Future<bool> login(Users user) async {
+    final Database db = await initDB();
 
-  updateUser(User user) async {
-    Database db = await _recuperarDataBase();
-
-    return await db.update('tb_user', user.toMap(),
-        where: 'idUser = ?', whereArgs: [user.idUser]);
-  }
-
-  getUser(int id) async {
-    Database db = await _recuperarDataBase();
-
-    List<Map> users = await db.query('tb_user',
-        columns: ['idUser', 'nome', 'email', 'senha'],
-        where: 'idUser = ?',
-        whereArgs: [id]);
-
-    if (users.isNotEmpty) {
-      var user = users.first;
-
-      return User.fromMap(user);
+    // I forgot the password to check
+    var result = await db.rawQuery(
+        "select * from users where usrName = '${user.email}' AND usrPassword = '${user.senha}'");
+    if (result.isNotEmpty) {
+      return true;
     } else {
-      return null;
+      return false;
     }
   }
 
-  getUsuarioByLoginSenha(String login, String senha) async {
-    Database db = await _recuperarDataBase();
+  //Sign up
+  Future<int> signup(Users user) async {
+    final Database db = await initDB();
 
-    List<Map> usuarios = await db.query('tb_user',
-        columns: ['idUser', 'nome', 'email', 'senha'],
-        where: 'email = ? AND senha = ?',
-        whereArgs: [login, senha]);
-
-    if (usuarios.isNotEmpty) {
-      var usuario = usuarios.first;
-
-      return User.fromMap(usuario);
-    } else {
-      return null;
-    }
+    return db.insert('users', user.toMap());
   }
 
-  getAllUser() async{
-    Database db = await _recuperarDataBase();
-
-    var result = await db.query('tb-user');
-    List<User>? list = result.isNotEmpty ? result.map((e) => User.fromMap(e)).toList() : null;
-
-    return list; 
+  //Search Method
+  Future<List<NoteModel>> searchNotes(String keyword) async {
+    final Database db = await initDB();
+    List<Map<String, Object?>> searchResult = await db
+        .rawQuery("select * from notes where noteTitle LIKE ?", ["%$keyword%"]);
+    return searchResult.map((e) => NoteModel.fromMap(e)).toList();
   }
 
-  deleteUser(int id) async {
-    Database db = await _recuperarDataBase();
+  //CRUD Methods
 
-    return await db.delete('tb_user', 
-     where: 'idUser = ?',
-     whereArgs: [id] );
+  //Create Note
+  Future<int> createNote(NoteModel note) async {
+    final Database db = await initDB();
+    return db.insert('notes', note.toMap());
   }
 
-  close() async{
-    Database db = await _recuperarDataBase();
+  //Get notes
+  Future<List<NoteModel>> getNotes() async {
+    final Database db = await initDB();
+    List<Map<String, Object?>> result = await db.query('notes');
+    return result.map((e) => NoteModel.fromMap(e)).toList();
+  }
 
-    db.close();
+  //Delete Notes
+  Future<int> deleteNote(int id) async {
+    final Database db = await initDB();
+    return db.delete('notes', where: 'noteId = ?', whereArgs: [id]);
+  }
+
+  //Update Notes
+  Future<int> updateNote(title, content, noteId) async {
+    final Database db = await initDB();
+    return db.rawUpdate(
+        'update notes set noteTitle = ?, noteContent = ? where noteId = ?',
+        [title, content, noteId]);
   }
 }

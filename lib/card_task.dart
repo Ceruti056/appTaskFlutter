@@ -3,11 +3,12 @@ import 'package:apptask/task.dart';
 import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 
 class CardTask extends StatefulWidget {
   const CardTask({super.key, required this.task, required this.user});
   final Task task;
-  final User user;
+  final Users user;
 
   @override
   State<CardTask> createState() => _CardTaskState();
@@ -100,17 +101,21 @@ class _CardTaskState extends State<CardTask> {
   }
 
   Widget _buildTaskListTile(Task task) => ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        subtitle: Text(task.dia_hora.toString()),
-        title: Text(task.title),
-        onTap: () {
-          final slidable = Slidable.of(context)!;
-          final isClosed = slidable.actionPaneType.value == ActionPaneType.none;
-          if (isClosed) {
-            slidable.openStartActionPane();
-          }
+      subtitle: Text(DateFormat("yMd").format(DateTime.parse(task.dia_hora))),
+      title: Text(task.title),
+      trailing: IconButton(
+        icon: const Icon(Icons.delete),
+        onPressed: () {
+          _deleteTask(task.idTask.toString());
+          _refreshList();
         },
-      );
+      ),
+      onTap: () {
+        setState(() {
+          titleController.text = task.title;
+          descriptionController.text = task.description;
+        });
+      });
 
   void _showEditDialog(Task task) {
     titleController.text = task.title;

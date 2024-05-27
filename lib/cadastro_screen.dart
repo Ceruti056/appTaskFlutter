@@ -1,160 +1,181 @@
-import 'package:apptask/dbTask.dart';
 import 'package:apptask/dbUser.dart';
-import 'package:apptask/home_screen.dart';
-import 'package:apptask/task_concluida.dart';
+import 'package:apptask/login_screen.dart';
 import 'package:apptask/user.dart';
 import 'package:flutter/material.dart';
 
-class CadastroScreen extends StatefulWidget {
-  const CadastroScreen({super.key, required this.user});
-  final String title = "Cadastrar";
-  final User user;
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  State<CadastroScreen> createState() => _CadastroScreenState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _CadastroScreenState extends State<CadastroScreen> {
-  LoginDB login = LoginDB();
+class _SignUpState extends State<SignUp> {
+  final nome = TextEditingController();
+  final email = TextEditingController();
+  final senha = TextEditingController();
+  final confirmPassword = TextEditingController();
 
-  TextEditingController nome = TextEditingController();
-  TextEditingController email = TextEditingController();
-  TextEditingController senha = TextEditingController();
-  TextEditingController resenha = TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
-  final formkey = GlobalKey<FormState>();
-  bool mostraSenha = false;
-  String resultado = "";
+  bool isVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: _menuBar(),
-        body: SingleChildScrollView(
-          reverse: true,
+      body: Center(
+        child: SingleChildScrollView(
           child: Form(
-              key: formkey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+            key: formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextFormField(
-                    controller: email,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.email_outlined),
-                        labelText: 'E-mail',
-                        hintText: 'Digite seu e-mail',
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5)))),
+                children: [
+                  const ListTile(
+                    title: Center(
+                      child: Text(
+                        "Cadastrar Nova Conta",
+                        style: TextStyle(
+                            fontSize: 50, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 30),
-                  TextFormField(
-                    controller: senha,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.key_outlined),
-                        labelText: 'Senha',
-                        hintText: 'Digite sua senha',
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5)))),
+                  const SizedBox(height: 20),
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.deepPurple.withOpacity(.2)),
+                    child: TextFormField(
+                      controller: email,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "O E-mail é obrigatório.";
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.person),
+                        border: InputBorder.none,
+                        hintText: "E-mail",
+                      ),
+                    ),
                   ),
+
+                  //Password field
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.deepPurple.withOpacity(.2)),
+                    child: TextFormField(
+                      controller: senha,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "A Senha é obrigatória";
+                        }
+                        return null;
+                      },
+                      obscureText: !isVisible,
+                      decoration: InputDecoration(
+                          icon: const Icon(Icons.lock),
+                          border: InputBorder.none,
+                          hintText: "A Senha é obrigatória.",
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isVisible = !isVisible;
+                                });
+                              },
+                              icon: Icon(isVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off))),
+                    ),
+                  ),
+
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.deepPurple.withOpacity(.2)),
+                    child: TextFormField(
+                      controller: confirmPassword,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "O Senha é obrigatório.";
+                        } else if (senha.text != confirmPassword.text) {
+                          return "As senhas são diferentes.";
+                        }
+                        return null;
+                      },
+                      obscureText: !isVisible,
+                      decoration: InputDecoration(
+                          icon: const Icon(Icons.lock),
+                          border: InputBorder.none,
+                          hintText: "Senha",
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isVisible = !isVisible;
+                                });
+                              },
+                              icon: Icon(isVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off))),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                  Container(
+                    height: 55,
+                    width: MediaQuery.of(context).size.width * .9,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.deepPurple),
+                    child: TextButton(
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            final db = DatabaseHelper();
+                            db
+                                .signup(Users(
+                                    nome: nome.text,
+                                    email: email.text,
+                                    senha: senha.text))
+                                .whenComplete(() {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginScreen()));
+                            });
+                          }
+                        },
+                        child: const Text(
+                          "CADASTRE-SE",
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()));
+                      },
+                      child: const Text("Já possui conta? Faça login"))
                 ],
-              )),
-        ));
-  }
-
-  void _cadastro() {
-    if (nome.text.isNotEmpty &&
-        email.text.isNotEmpty &&
-        senha.text.isNotEmpty) {
-      setState(() {
-        _showSnackbar('Preencha todos os campos', Colors.yellow);
-      });
-    }
-
-    if (senha.text != resenha.text) {
-      setState(() {
-        _showSnackbar('Senha inválida. Digite novamente', Colors.red);
-        senha.text = "";
-      });
-    }
-
-    if (senha.text == resenha.text) {
-      setState(() {
-        _showSnackbar('Cadastro realizado com sucesso!', Colors.green);
-        login.addUser(User(
-            idUser: widget.user.idUser,
-            nome: nome.text,
-            email: email.text,
-            senha: senha.text));
-        Navigator.pop(context, '/login');
-      });
-    }
-  }
-
-  AppBar _menuBar() {
-    return AppBar(
-      title: const Text('Cadastrar'),
-      centerTitle: true,
-      actions: [
-        PopupMenuButton(itemBuilder: (BuildContext context) {
-          return [
-            PopupMenuItem(
-                child: TextButton.icon(
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return HomeScreen(
-                          user: User(
-                              idUser: widget.user.idUser,
-                              nome: nome.text,
-                              email: email.text,
-                              senha: senha.text),
-                        );
-                      }));
-                      dispose();
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Novas tasks'))),
-            PopupMenuItem(
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const TaskConcluidaPage();
-                  }));
-                  dispose();
-                },
-                icon: const Icon(Icons.check),
-                label: const Text('Tasks Concluídas'),
               ),
             ),
-            PopupMenuItem(
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return HomeScreen(
-                      user: User(
-                          idUser: widget.user.idUser,
-                          nome: nome.text,
-                          email: email.text,
-                          senha: senha.text),
-                    );
-                  }));
-                  dispose();
-                },
-                icon: const Icon(Icons.list),
-                label: const Text('Minhas Tasks'),
-              ),
-            ),
-          ];
-        }),
-      ],
+          ),
+        ),
+      ),
     );
-  }
-
-  void _showSnackbar(String message, Color color) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
   }
 }

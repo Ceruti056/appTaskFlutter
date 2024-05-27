@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.user});
-  final User user;
+  final Users user;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -18,10 +18,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _refreshUserList();
+    _refreshList();
   }
 
-  void _refreshUserList() {
+  void _refreshList() {
     setState(() {
       futureTasks = db.getAllTask();
     });
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _refreshUserList();
+    _refreshList();
     return Scaffold(
         appBar: _menuBar(),
         body: FutureBuilder(

@@ -1,5 +1,4 @@
 import 'package:apptask/task.dart';
-import 'package:apptask/user.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 

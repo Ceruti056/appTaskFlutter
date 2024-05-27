@@ -1,11 +1,11 @@
 class Task {
-  final int? idTask;
+  final int idTask;
   final String title;
   final String description;
   final String dia_hora;
 
   Task({
-    this.idTask,
+    required this.idTask,
     required this.title,
     required this.description,
     required this.dia_hora,

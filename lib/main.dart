@@ -20,12 +20,12 @@ class MyApp extends StatelessWidget {
   
   const MyApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const SplashScreen(),
+      home: const SplashScreen(user: null,),
       debugShowCheckedModeBanner: false,
-
       theme: MaterialTheme(Typography.blackCupertino).light(),
       //darkTheme: MaterialTheme(Typography.blackCupertino).dark(),
     );
