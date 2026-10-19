@@ -162,16 +162,6 @@ flutter run
 
 ---
 
-## 🔮 Próximos Passos e Melhorias
-
-- [ ] Implementar a listagem completa na página de tarefas concluídas (`TaskConcluidaPage`).
-- [ ] Vincular tarefas diretamente ao `idUser` logado para suporte multiusuário isolado.
-- [ ] Adicionar notificações locais para lembretes de tarefas na hora agendada.
-- [ ] Criptografia de senhas (ex: com hash SHA-256 / Bcrypt) antes de salvar no banco local.
-- [ ] Alternância dinâmica entre tema claro e escuro (*Dark Mode*).
-
----
-
 ## 📄 Licença
 
 Este projeto é desenvolvido para fins de estudo e produtividade pessoal. Sinta-se à vontade para utilizar, sugerir melhorias e contribuir!
